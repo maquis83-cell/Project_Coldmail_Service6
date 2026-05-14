@@ -35,7 +35,7 @@ with st.sidebar:
 7. 📝 **템플릿** — 프롬프트 관리
 """)
     st.divider()
-    st.caption("Powered by Claude claude-sonnet-4-20250514")
+    st.caption("Powered by GPT-4o")
 
 # ── 대시보드 헤더 ──────────────────────────────────────────────────────
 st.title("📨 콜드메일 AI 에이전트")

@@ -1,5 +1,5 @@
 """F-10: 템플릿 관리 + LLM 개선 제안"""
-import anthropic
+from openai import OpenAI
 from services.database import get_templates, upsert_template, delete_template, increment_template_usage
 
 
@@ -25,9 +25,9 @@ def use_template(tid: str) -> str | None:
 
 
 def improve_template(api_key: str, current_prompt: str) -> str:
-    client = anthropic.Anthropic(api_key=api_key)
-    resp = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    client = OpenAI(api_key=api_key)
+    resp = client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=1024,
         messages=[{
             "role": "user",
@@ -38,4 +38,4 @@ def improve_template(api_key: str, current_prompt: str) -> str:
             ),
         }],
     )
-    return resp.content[0].text.strip()
+    return resp.choices[0].message.content.strip()

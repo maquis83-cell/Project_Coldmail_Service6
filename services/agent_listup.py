@@ -1,7 +1,7 @@
-"""F-01: AI Agent 기반 업체 리스트업 (Claude tool_use)"""
+"""F-01: AI Agent 기반 업체 리스트업 (GPT-4o)"""
 import json
 import re
-import anthropic
+from openai import OpenAI
 
 
 SYSTEM_PROMPT = """당신은 국내 기업 리서치 전문 AI입니다.
@@ -23,70 +23,60 @@ CATEGORY_DESC = {
 }
 
 
+def _call(client: OpenAI, messages: list[dict]) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        max_tokens=4096,
+        messages=messages,
+    )
+    return response.choices[0].message.content.strip()
+
+
 def search_companies(
     api_key: str,
     category: str,
     rank_range: str,
     min_results: int = 10,
 ) -> list[dict]:
-    """Claude API로 업체 리스트를 생성한다."""
-    client = anthropic.Anthropic(api_key=api_key)
+    """GPT-4o로 업체 리스트를 생성한다."""
+    client = OpenAI(api_key=api_key)
     cat_desc = CATEGORY_DESC.get(category, category)
 
-    user_msg = (
-        f"카테고리: {category} ({cat_desc})\n"
-        f"매출 순위 구간: {rank_range}위\n"
-        f"위 조건에 맞는 국내 업체 {min_results}개 이상을 JSON 배열로 반환하세요."
-    )
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": (
+            f"카테고리: {category} ({cat_desc})\n"
+            f"매출 순위 구간: {rank_range}위\n"
+            f"위 조건에 맞는 국내 업체 {min_results}개 이상을 JSON 배열로 반환하세요."
+        )},
+    ]
 
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=4096,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_msg}],
-    )
-
-    raw = response.content[0].text.strip()
-    # 코드블록 제거
+    raw = _call(client, messages)
     raw = re.sub(r"```(?:json)?", "", raw).strip().strip("`")
 
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
-        # 배열 추출 재시도
         match = re.search(r"\[.*\]", raw, re.DOTALL)
-        if match:
-            data = json.loads(match.group())
-        else:
-            data = []
+        data = json.loads(match.group()) if match else []
 
     # 결과 부족 시 완화 재검색
     if len(data) < min_results:
-        relaxed_msg = (
-            f"카테고리: {category}\n"
-            f"조건을 조금 완화해서 국내 업체 {min_results}개를 JSON 배열로 반환하세요. "
-            "이미 반환한 업체는 제외하고 새 업체를 추가하세요.\n"
-            f"기존 목록: {json.dumps([d.get('company_name') for d in data], ensure_ascii=False)}"
-        )
-        r2 = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4096,
-            system=SYSTEM_PROMPT,
-            messages=[
-                {"role": "user", "content": user_msg},
-                {"role": "assistant", "content": raw},
-                {"role": "user", "content": relaxed_msg},
-            ],
-        )
-        raw2 = r2.content[0].text.strip()
+        messages += [
+            {"role": "assistant", "content": raw},
+            {"role": "user", "content": (
+                f"조건을 조금 완화해서 국내 업체 {min_results}개를 JSON 배열로 반환하세요. "
+                "이미 반환한 업체는 제외하고 새 업체를 추가하세요.\n"
+                f"기존 목록: {json.dumps([d.get('company_name') for d in data], ensure_ascii=False)}"
+            )},
+        ]
+        raw2 = _call(client, messages)
         raw2 = re.sub(r"```(?:json)?", "", raw2).strip().strip("`")
         try:
-            extra = json.loads(raw2)
-            data.extend(extra)
+            data.extend(json.loads(raw2))
         except json.JSONDecodeError:
             pass
 
-    # 정규화
     result = []
     for item in data:
         if not isinstance(item, dict):

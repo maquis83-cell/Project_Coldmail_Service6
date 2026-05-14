@@ -1,7 +1,7 @@
 """F-04: 카테고리별 콜드메일 초안 생성 + F-05: 다국어 번역"""
 import json
 import re
-import anthropic
+from openai import OpenAI
 
 SYSTEM_PROMPTS = {
     "샘플북제공": """당신은 B2B 영업 전문가입니다.
@@ -63,7 +63,7 @@ def generate_draft(
     sender: dict,
     custom_system: str | None = None,
 ) -> dict:
-    client = anthropic.Anthropic(api_key=api_key)
+    client = OpenAI(api_key=api_key)
     system = custom_system or SYSTEM_PROMPTS.get(category, DEFAULT_SYSTEM)
     user_msg = (
         f"업체명: {company_name}\n"
@@ -72,14 +72,16 @@ def generate_draft(
         f"({sender.get('sender_title', '')}, {sender.get('sender_company', '')})"
     )
 
-    resp = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    resp = client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=1024,
-        system=system,
-        messages=[{"role": "user", "content": user_msg}],
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user_msg},
+        ],
     )
 
-    draft = _parse_json(resp.content[0].text)
+    draft = _parse_json(resp.choices[0].message.content)
     draft["signature"] = _build_signature(sender)
     draft["language"] = "ko"
     return draft
@@ -90,7 +92,7 @@ def translate_draft(api_key: str, draft: dict, target_lang: str) -> dict:
         return draft
 
     lang_name = SUPPORTED_LANGUAGES.get(target_lang, target_lang)
-    client = anthropic.Anthropic(api_key=api_key)
+    client = OpenAI(api_key=api_key)
     prompt = (
         f"다음 콜드메일 제목과 본문을 {lang_name}로 번역하세요.\n"
         "자연스러운 비즈니스 문체를 유지하세요.\n"
@@ -98,11 +100,11 @@ def translate_draft(api_key: str, draft: dict, target_lang: str) -> dict:
         f"제목: {draft['subject']}\n본문: {draft['body']}"
     )
 
-    resp = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    resp = client.chat.completions.create(
+        model="gpt-4o",
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    translated = _parse_json(resp.content[0].text)
+    translated = _parse_json(resp.choices[0].message.content)
     return {**draft, **translated, "language": target_lang}

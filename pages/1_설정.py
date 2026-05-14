@@ -29,19 +29,11 @@ with st.form("settings_form"):
     )
 
     st.subheader("API 키")
-    col3, col4 = st.columns(2)
-    with col3:
-        anthropic_key = st.text_input(
-            "Anthropic API Key",
-            value=s.get("anthropic_api_key", ""),
-            type="password",
-        )
-    with col4:
-        openai_key = st.text_input(
-            "OpenAI API Key (선택)",
-            value=s.get("openai_api_key", ""),
-            type="password",
-        )
+    openai_key = st.text_input(
+        "OpenAI API Key",
+        value=s.get("openai_api_key", ""),
+        type="password",
+    )
 
     st.subheader("기본값")
     col5, col6 = st.columns(2)
@@ -70,7 +62,6 @@ if submitted:
         "sender_company": sender_company,
         "sender_phone": sender_phone,
         "signature_block": signature_block,
-        "anthropic_api_key": anthropic_key,
         "openai_api_key": openai_key,
         "default_language": default_lang,
         "default_category": default_cat,
@@ -81,18 +72,18 @@ if submitted:
 st.divider()
 st.subheader("API 키 연결 상태 확인")
 if st.button("연결 확인"):
-    key = s.get("anthropic_api_key", "") or anthropic_key
+    key = s.get("openai_api_key", "") or openai_key
     if not key:
-        st.error("Anthropic API 키를 먼저 저장하세요.")
+        st.error("OpenAI API 키를 먼저 저장하세요.")
     else:
         try:
-            import anthropic
-            client = anthropic.Anthropic(api_key=key)
-            client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=10,
+            from openai import OpenAI
+            client = OpenAI(api_key=key)
+            client.chat.completions.create(
+                model="gpt-4o-mini",
+                max_tokens=5,
                 messages=[{"role": "user", "content": "ping"}],
             )
-            st.success("Anthropic API 연결 성공!")
+            st.success("OpenAI API 연결 성공!")
         except Exception as e:
             st.error(f"연결 실패: {e}")

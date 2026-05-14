@@ -153,7 +153,7 @@ STATUS_EMOJI = {
 }
 
 df = pd.DataFrame(companies)
-display_cols = ["company_name", "industry", "url_status", "email", "email_status", "category", "rank_range"]
+display_cols = ["company_name", "industry", "url_status", "email", "email_status", "rank_range"]
 display_cols = [c for c in display_cols if c in df.columns]
 df_display = df[display_cols].copy()
 for col in ["url_status", "email_status"]:

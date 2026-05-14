@@ -7,13 +7,16 @@ if _ROOT not in sys.path:
 import streamlit as st
 import pandas as pd
 from services.database import (
-    get_settings, get_all_companies, insert_company,
+    init_db, get_settings, get_all_companies, insert_company,
     delete_company, clear_companies, update_company, update_draft,
 )
 from services.agent_listup import search_companies
 from services.url_checker import check_url
 from services.email_validator import validate_email
 from services.draft_generator import generate_draft
+
+# 페이지 직접 접근 시에도 DB 초기화 보장
+init_db()
 
 st.set_page_config(page_title="업체 검색", page_icon="🔍", layout="wide")
 st.title("🔍 업체 리스트업")
@@ -133,7 +136,7 @@ if search_btn:
             label=f"완료 — {len(results)}개 업체 처리, {success_count}개 초안 생성",
             state="complete",
         )
-    st.rerun()
+    st.switch_page("pages/4_메일작성.py")
 
 # ── 업체 목록 표시 ─────────────────────────────────────────────────────
 st.divider()

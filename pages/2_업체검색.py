@@ -70,6 +70,9 @@ if search_btn:
 
     with st.status("AI 에이전트가 작업 중입니다...", expanded=True) as status:
 
+        # 이전 검색 결과 초기화
+        clear_companies()
+
         # STEP 1: 업체 리스트업
         st.write("**[1/4]** 업체 리스트업 중...")
         try:

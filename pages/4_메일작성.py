@@ -31,9 +31,11 @@ if not with_drafts:
     st.info("아직 생성된 초안이 없습니다. [업체검색] 페이지에서 검색을 시작하면 초안이 자동으로 생성됩니다.")
     st.stop()
 
-# ── 세션 상태 초기화 (첫 진입 or 새 검색 후) ──────────────────────────
+# ── 세션 상태 초기화 (새 검색이거나 키가 없을 때 DB에서 복원) ──────────
 first_draft_key = with_drafts[0]["id"]
-if st.session_state.get("draft_source") != first_draft_key:
+if (st.session_state.get("draft_source") != first_draft_key
+        or "mail_subject" not in st.session_state
+        or "mail_body" not in st.session_state):
     first_draft = json.loads(with_drafts[0]["draft_json"])
     st.session_state.mail_subject = first_draft.get("subject", "")
     st.session_state.mail_body = first_draft.get("body", "")
@@ -91,8 +93,11 @@ if regen:
             st.error(f"오류: {e}")
 
 # ── 제목 & 본문 ────────────────────────────────────────────────────────
-st.text_input("제목", key="mail_subject")
-st.text_area("본문", height=280, key="mail_body")
+subject_val = st.text_input("제목", value=st.session_state.mail_subject)
+st.session_state.mail_subject = subject_val
+
+body_val = st.text_area("본문", height=280, value=st.session_state.mail_body)
+st.session_state.mail_body = body_val
 
 # ── 서명 & 첨부파일 ───────────────────────────────────────────────────
 col_sig, col_att = st.columns(2)

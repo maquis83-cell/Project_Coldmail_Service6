@@ -65,10 +65,10 @@ for c in with_drafts:
     with col_r:
         category = st.selectbox(
             "카테고리",
-            ["샘플북제공", "제품제안", "신규안내"],
-            index=["샘플북제공", "제품제안", "신규안내"].index(
+            ["샘플북제공", "제품제안", "신제품 안내"],
+            index=["샘플북제공", "제품제안", "신제품 안내"].index(
                 c.get("category", "샘플북제공")
-                if c.get("category") in ["샘플북제공", "제품제안", "신규안내"]
+                if c.get("category") in ["샘플북제공", "제품제안", "신제품 안내"]
                 else "샘플북제공"
             ),
             key=f"cat_{cid}",

@@ -33,7 +33,7 @@ df_show.columns = [
 # 필터
 col1, col2 = st.columns(2)
 with col1:
-    cat_filter = st.multiselect("카테고리 필터", ["샘플북제공", "제품제안", "신규안내"])
+    cat_filter = st.multiselect("카테고리 필터", ["샘플북제공", "제품제안", "신제품 안내"])
 with col2:
     search = st.text_input("업체명 검색")
 

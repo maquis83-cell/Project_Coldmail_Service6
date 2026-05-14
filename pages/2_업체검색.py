@@ -40,7 +40,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     category = st.selectbox(
         "메일 카테고리",
-        ["샘플북제공", "제품제안", "신규안내"],
+        ["샘플북제공", "제품제안", "신제품 안내"],
         help="자동 생성될 콜드메일의 주제 유형을 선택하세요.",
     )
 with col2:
@@ -178,7 +178,7 @@ with st.expander("➕ 업체 수동 추가"):
             ind = st.text_input("업종")
         with c2:
             url = st.text_input("홈페이지 URL")
-            cat2 = st.selectbox("카테고리", ["샘플북제공", "제품제안", "신규안내"])
+            cat2 = st.selectbox("카테고리", ["샘플북제공", "제품제안", "신제품 안내"])
         if st.form_submit_button("추가"):
             if nm:
                 insert_company({"company_name": nm, "industry": ind,

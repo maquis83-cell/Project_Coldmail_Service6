@@ -47,7 +47,7 @@ st.subheader("새 템플릿 추가")
 
 with st.form("new_template"):
     tmpl_name = st.text_input("템플릿 이름 *")
-    tmpl_cat = st.selectbox("카테고리", ["", "샘플북제공", "제품제안", "신규안내"],
+    tmpl_cat = st.selectbox("카테고리", ["", "샘플북제공", "제품제안", "신제품 안내"],
                             format_func=lambda x: x or "전체")
     tmpl_prompt = st.text_area("시스템 프롬프트 *", height=200,
                                 placeholder="LLM에게 전달할 메일 작성 지침을 입력하세요...")

@@ -29,6 +29,7 @@ def init_db():
             url_status    TEXT CHECK(url_status IN ('accessible','inaccessible','needs_review')),
             category      TEXT,
             rank_range    TEXT,
+            draft_json    TEXT,
             created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -69,6 +70,12 @@ def init_db():
 
         INSERT OR IGNORE INTO user_settings (id) VALUES ('default');
     """)
+    # 기존 DB 마이그레이션: draft_json 컬럼 추가
+    try:
+        conn.execute("ALTER TABLE companies ADD COLUMN draft_json TEXT")
+        conn.commit()
+    except Exception:
+        pass
     conn.commit()
     conn.close()
 
@@ -119,6 +126,15 @@ def delete_company(cid: str):
 def clear_companies():
     conn = get_conn()
     conn.execute("DELETE FROM companies")
+    conn.commit()
+    conn.close()
+
+
+def update_draft(cid: str, draft: dict):
+    import json
+    conn = get_conn()
+    conn.execute("UPDATE companies SET draft_json = ? WHERE id = ?",
+                 (json.dumps(draft, ensure_ascii=False), cid))
     conn.commit()
     conn.close()
 

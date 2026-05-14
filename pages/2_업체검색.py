@@ -13,10 +13,10 @@ st.set_page_config(page_title="업체 검색", page_icon="🔍", layout="wide")
 st.title("🔍 업체 리스트업")
 
 settings = get_settings()
-api_key = settings.get("anthropic_api_key", "")
+api_key = settings.get("openai_api_key", "")
 
 if not api_key:
-    st.warning("⚠️ 먼저 [설정] 페이지에서 Anthropic API 키를 저장하세요.")
+    st.warning("⚠️ 먼저 [설정] 페이지에서 OpenAI API 키를 저장하세요.")
     st.stop()
 
 # ── 검색 조건 ───────────────────────────────────────────────────────────

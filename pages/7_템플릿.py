@@ -12,7 +12,7 @@ st.set_page_config(page_title="템플릿", page_icon="📝", layout="wide")
 st.title("📝 메일 템플릿 관리")
 
 settings = get_settings()
-api_key = settings.get("anthropic_api_key", "")
+api_key = settings.get("openai_api_key", "")
 
 templates = list_templates()
 

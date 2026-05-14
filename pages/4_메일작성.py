@@ -14,7 +14,7 @@ st.set_page_config(page_title="메일 작성", page_icon="✉️", layout="wide"
 st.title("✉️ 콜드메일 초안 작성")
 
 settings = get_settings()
-api_key = settings.get("anthropic_api_key", "")
+api_key = settings.get("openai_api_key", "")
 if not api_key:
     st.warning("⚠️ 먼저 [설정] 페이지에서 API 키를 저장하세요.")
     st.stop()

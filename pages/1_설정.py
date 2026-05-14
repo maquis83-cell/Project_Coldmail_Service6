@@ -36,22 +36,12 @@ with st.form("settings_form"):
     )
 
     st.subheader("기본값")
-    col5, col6 = st.columns(2)
-    with col5:
-        default_lang = st.selectbox(
-            "기본 언어",
-            ["ko", "en", "ja", "zh"],
-            index=["ko", "en", "ja", "zh"].index(s.get("default_language", "ko")),
-            format_func=lambda x: {"ko": "한국어", "en": "영어", "ja": "일본어", "zh": "중국어"}[x],
-        )
-    with col6:
-        default_cat = st.selectbox(
-            "기본 카테고리",
-            ["", "샘플북제공", "제품제안", "신규안내"],
-            index=["", "샘플북제공", "제품제안", "신규안내"].index(
-                s.get("default_category", "") or ""
-            ),
-        )
+    default_lang = st.selectbox(
+        "기본 언어",
+        ["ko", "en", "ja", "zh"],
+        index=["ko", "en", "ja", "zh"].index(s.get("default_language", "ko")),
+        format_func=lambda x: {"ko": "한국어", "en": "영어", "ja": "일본어", "zh": "중국어"}[x],
+    )
 
     submitted = st.form_submit_button("저장", type="primary")
 
@@ -64,7 +54,6 @@ if submitted:
         "signature_block": signature_block,
         "openai_api_key": openai_key,
         "default_language": default_lang,
-        "default_category": default_cat,
     })
     st.success("설정이 저장되었습니다.")
 

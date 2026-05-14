@@ -21,21 +21,19 @@ if not api_key:
 
 # ── 검색 조건 ───────────────────────────────────────────────────────────
 st.subheader("검색 조건")
-col1, col2, col3 = st.columns(3)
+
+industry_type = st.text_input(
+    "산업군",
+    placeholder="예: 화장품 업체, 출판사, 식품 제조업체, IT 스타트업 ...",
+)
+
+col1, col2 = st.columns(2)
 with col1:
-    category = st.selectbox(
-        "카테고리",
-        ["샘플북제공", "제품제안", "신규안내"],
-        index=["샘플북제공", "제품제안", "신규안내"].index(
-            settings.get("default_category") or "샘플북제공"
-        ) if settings.get("default_category") in ["샘플북제공", "제품제안", "신규안내"] else 0,
-    )
-with col2:
     rank_range = st.selectbox(
         "매출 순위 구간",
         ["1~50", "51~100", "101~150", "151~200"],
     )
-with col3:
+with col2:
     min_results = st.number_input("최소 업체 수", min_value=5, max_value=50, value=10)
 
 col_btn1, col_btn2 = st.columns([1, 5])
@@ -50,13 +48,15 @@ if clear_btn:
     st.rerun()
 
 if search_btn:
+    if not industry_type.strip():
+        st.warning("산업군을 입력하세요. (예: 화장품 업체, 출판사)")
+        st.stop()
     with st.status("AI 에이전트가 업체를 탐색 중입니다...", expanded=True) as status:
-        st.write(f"카테고리: **{category}** / 순위 구간: **{rank_range}위**")
+        st.write(f"산업군: **{industry_type}** / 순위 구간: **{rank_range}위**")
         try:
-            results = search_companies(api_key, category, rank_range, min_results)
+            results = search_companies(api_key, industry_type, rank_range, min_results)
             st.write(f"✅ {len(results)}개 업체 수집 완료")
             for r in results:
-                r["category"] = category
                 r["rank_range"] = rank_range
                 insert_company(r)
             status.update(label=f"완료 — {len(results)}개 업체 저장됨", state="complete")
